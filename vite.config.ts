@@ -35,9 +35,13 @@ errorOnDuplicatesPkgDeps(devDependencies, dependencies);
 //* เช่น rewriteRoutes: [{ prefix: 'th', paths: { 'docs': 'aekkasarn' } }]
 //* เราก็จะถูกจำกัดให้เข้า aekkasarn ด้วย /th ก่อน ไม่งันจะเข้าไม่ได้ จะต้องเข้าผ่าน path /th/aekkasarn
 
+//* อย่าลืมประกาศ serverPluginsDir เอาไว้ใน qwikCity() ด้วย จะได้ใช้ plugin ได้
+
 export default defineConfig(({ command, mode }): UserConfig => {
   return {
     plugins: [qwikCity({
+      serverPluginsDir: 'src/plugins',
+
       rewriteRoutes: [
         {
           paths: { 'docs': 'documentation' }
