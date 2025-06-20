@@ -19,9 +19,40 @@ errorOnDuplicatesPkgDeps(devDependencies, dependencies);
  * Note that Vite normally starts from `index.html` but the qwikCity plugin makes start at `src/entry.ssr.tsx` instead.
  */
 
+//* เรื่องสุดท้ายของหัวข้อ routing จะอยู่ในหน้าของ vite.config.ts 
+//* สมมติว่าเรากำลังจะเข้าหน้า /docs แต่ว่าเข้าด้วย /document แทน
+//* ตามหลักแล้วก็ต้องไม่เจอ route /document เพราะเราไม่ได้สร้างเอาไว้
+//* แต่การทำ rewrite route จะทำให้เราสามารถระบุชื่อ path อีกตัวหนึ่งที่จะชี้มายัง path หลักของเราได้
+//* เช่น /document ก็จะหมายถึง /docs เหมือนกัน สามารถใช้ทั้งสองในการเข้าถึงได้โดยไม่ต้องเขียน route เพิ่ม
+//* ใน defineConfig ข้างในจะมี plugin และด้านในจะมี qwikCity ให้เราส่ง object ที่มี rewriteRoutes: [] เข้าไปด้านใน
+//* เช่น return { plugins: [qwikCity({ rewriteRoutes: []}), ...]}
+//* ด้านใน array เราก็จะสามารถทำ rewrite route ได้แล้วโดยการเขียนแยกใน object แต่ละตัว
+//* config object จะต้องมี paths: { stringA: stringB } เพื่อระบุว่าถ้าเข้า /stringB ก็จะหมายถึง /stringA เหมือนกัน
+//* ตัวอย่างการ config คือ rewriteRoutes: [ {paths: {'docs': 'document'}} ]
+//* จากตัวอย่าง การเข้า document ก็จะหมายถึงการเข้า docs เหมือนกัน (บน url ก็ยังแสดงว่า /document อยู่เหมือนเดิม)
+//* นอกจากั้นเราสามารถระบุ prefix ให้ rewrite route ก็ได้เหมือนกัน
+//* ก่อนหน้า paths ให้เราใช้ prefix: 'string'
+//* เช่น rewriteRoutes: [{ prefix: 'th', paths: { 'docs': 'aekkasarn' } }]
+//* เราก็จะถูกจำกัดให้เข้า aekkasarn ด้วย /th ก่อน ไม่งันจะเข้าไม่ได้ จะต้องเข้าผ่าน path /th/aekkasarn
+
+//* อย่าลืมประกาศ serverPluginsDir เอาไว้ใน qwikCity() ด้วย จะได้ใช้ plugin ได้
+
 export default defineConfig(({ command, mode }): UserConfig => {
   return {
-    plugins: [qwikCity(), qwikVite(), tsconfigPaths(), vanillaExtractPlugin()],
+    plugins: [qwikCity({
+      serverPluginsDir: 'src/plugins',
+
+      rewriteRoutes: [
+        {
+          paths: { 'docs': 'documentation' }
+        }, 
+
+        {
+          prefix: 'th', 
+          paths: { 'docs': 'th-docs'}
+        }
+      ]
+    }), qwikVite(), tsconfigPaths(), vanillaExtractPlugin()],
     // This tells Vite which dependencies to pre-build in dev mode.
     optimizeDeps: {
       // Put problematic deps that break bundling here, mostly those with binaries.
